@@ -3,7 +3,7 @@
   "name": "Magewell Pro Convert",
   "codeowners": [],
   "config_flow": true,
-  "documentation": "https://github.com/jesselee-networks/homeassistant-magewell",
+  "documentation": "https://github.com/brianegge/homeassistant-magewell",
   "iot_class": "local_polling",
   "requirements": [],
   "version": "1.0.0"
