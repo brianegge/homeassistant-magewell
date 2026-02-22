@@ -1,0 +1,28 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Magewell Pro Convert",
+        "data": {
+          "host": "Host",
+          "username": "Username",
+          "password": "Password",
+          "scan_interval": "Scan interval (seconds)"
+        },
+        "data_description": {
+          "host": "IP address or hostname of the Magewell device",
+          "username": "Device username (default: Admin)",
+          "password": "Device password",
+          "scan_interval": "Polling interval in seconds (10-300)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to the Magewell device",
+      "invalid_auth": "Invalid username or password"
+    },
+    "abort": {
+      "already_configured": "This device is already configured"
+    }
+  }
+}
