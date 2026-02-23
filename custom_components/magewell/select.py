@@ -8,19 +8,20 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .api import MagewellApiError
-from .const import DOMAIN
 from .coordinator import MagewellCoordinator
 from .sensor import MagewellEntity, _get_ndi_source_name
 
 _LOGGER = logging.getLogger(__name__)
+
+PARALLEL_UPDATES = 1
 
 
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Set up Magewell select entity from a config entry."""
-    coordinator = hass.data[DOMAIN][entry.entry_id]["coordinator"]
-    client = hass.data[DOMAIN][entry.entry_id]["client"]
+    coordinator = entry.runtime_data.coordinator
+    client = entry.runtime_data.client
     async_add_entities([MagewellNdiSourceSelect(coordinator, entry, client)])
 
 

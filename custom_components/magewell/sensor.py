@@ -21,6 +21,8 @@ from .coordinator import MagewellCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
+PARALLEL_UPDATES = 0
+
 
 def _get_ndi_source_name(summary: dict) -> str:
     """Extract friendly NDI source name from summary info."""
@@ -82,7 +84,7 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Set up Magewell sensors from a config entry."""
-    coordinator = hass.data[DOMAIN][entry.entry_id]["coordinator"]
+    coordinator = entry.runtime_data.coordinator
     async_add_entities([
         MagewellStatusSensor(coordinator, entry),
         MagewellNdiSourceSensor(coordinator, entry),

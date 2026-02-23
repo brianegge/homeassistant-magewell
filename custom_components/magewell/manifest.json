@@ -1,7 +1,7 @@
 {
   "domain": "magewell",
   "name": "Magewell Pro Convert",
-  "codeowners": [],
+  "codeowners": ["@brianegge"],
   "config_flow": true,
   "documentation": "https://github.com/brianegge/homeassistant-magewell",
   "iot_class": "local_polling",

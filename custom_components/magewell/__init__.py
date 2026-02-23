@@ -1,19 +1,32 @@
 """Magewell Pro Convert integration."""
 
 import logging
+from dataclasses import dataclass
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_USERNAME
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryAuthFailed
 
-from .api import MagewellClient
-from .const import CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL, DOMAIN, PLATFORMS
+from .api import MagewellAuthError, MagewellClient
+from .const import CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL, PLATFORMS
 from .coordinator import MagewellCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+@dataclass
+class MagewellRuntimeData:
+    """Runtime data for the Magewell integration."""
+
+    client: MagewellClient
+    coordinator: MagewellCoordinator
+
+
+type MagewellConfigEntry = ConfigEntry[MagewellRuntimeData]
+
+
+async def async_setup_entry(hass: HomeAssistant, entry: MagewellConfigEntry) -> bool:
     """Set up Magewell Pro Convert from a config entry."""
     client = MagewellClient(
         host=entry.data[CONF_HOST],
@@ -21,7 +34,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         password=entry.data[CONF_PASSWORD],
     )
 
-    await client.login()
+    try:
+        await client.login()
+    except MagewellAuthError as err:
+        await client.close()
+        raise ConfigEntryAuthFailed from err
 
     coordinator = MagewellCoordinator(
         hass,
@@ -30,20 +47,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     )
     await coordinator.async_config_entry_first_refresh()
 
-    hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN][entry.entry_id] = {
-        "client": client,
-        "coordinator": coordinator,
-    }
+    entry.runtime_data = MagewellRuntimeData(client=client, coordinator=coordinator)
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
 
 
-async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+async def async_unload_entry(hass: HomeAssistant, entry: MagewellConfigEntry) -> bool:
     """Unload a config entry."""
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
-        data = hass.data[DOMAIN].pop(entry.entry_id)
-        await data["client"].close()
+        await entry.runtime_data.client.close()
     return unload_ok

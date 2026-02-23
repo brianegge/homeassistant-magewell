@@ -1,0 +1,9 @@
+[project]
+name = "homeassistant-magewell"
+version = "1.0.0"
+description = "Magewell Pro Convert custom component for Home Assistant"
+requires-python = ">=3.12,<3.14"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"

@@ -56,6 +56,15 @@ Copy `custom_components/magewell/` into your Home Assistant `config/custom_compo
 
 The integration communicates with the Magewell device over its local HTTP API (`http://<host>/mwapi`). It authenticates with MD5-hashed credentials, maintains a persistent TCP session, and polls at the configured interval for device summary, current channel, and available NDI sources. No cloud services or external dependencies are required.
 
+## Removal
+
+1. Go to **Settings > Devices & Services**
+2. Find the **Magewell Pro Convert** integration and click on it
+3. Click the three-dot menu on the device entry and select **Delete**
+4. If installed via HACS, open HACS > **Integrations**, find **Magewell Pro Convert**, and click **Remove**
+5. If installed manually, delete the `custom_components/magewell/` directory
+6. Restart Home Assistant
+
 ## Migration from shell script
 
 If you previously used the `magewell_status.sh` + `command_line` sensor approach:
