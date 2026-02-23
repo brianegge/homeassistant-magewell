@@ -1,6 +1,6 @@
 [project]
 name = "homeassistant-magewell"
-version = "1.0.0"
+version = "1.1.0"
 description = "Magewell Pro Convert custom component for Home Assistant"
 requires-python = ">=3.12,<3.14"
 
