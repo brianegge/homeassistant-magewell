@@ -218,3 +218,57 @@ async def test_reauth_flow_invalid_auth(
     assert result["type"] is FlowResultType.FORM
     assert result["step_id"] == "reauth_confirm"
     assert result["errors"] == {"base": "invalid_auth"}
+
+
+async def test_reconfigure_flow_success(
+    hass: HomeAssistant,
+    mock_setup_entry: AsyncMock,
+    mock_magewell_client: AsyncMock,
+    mock_config_entry,
+) -> None:
+    """Test successful reconfiguration flow."""
+    mock_config_entry.add_to_hass(hass)
+
+    result = await mock_config_entry.start_reconfigure_flow(hass)
+    assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "reconfigure"
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        user_input={
+            CONF_HOST: "192.168.1.200",
+            CONF_USERNAME: "Admin",
+            CONF_PASSWORD: "new_secret",
+            CONF_SCAN_INTERVAL: 60,
+        },
+    )
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "reconfigure_successful"
+    assert mock_config_entry.data[CONF_HOST] == "192.168.1.200"
+    assert mock_config_entry.data[CONF_PASSWORD] == "new_secret"
+    assert mock_config_entry.data[CONF_SCAN_INTERVAL] == 60
+
+
+async def test_reconfigure_flow_auth_error(
+    hass: HomeAssistant,
+    mock_setup_entry: AsyncMock,
+    mock_magewell_client: AsyncMock,
+    mock_config_entry,
+) -> None:
+    """Test reconfigure flow with invalid credentials."""
+    mock_config_entry.add_to_hass(hass)
+    mock_magewell_client.login.side_effect = MagewellAuthError("bad")
+
+    result = await mock_config_entry.start_reconfigure_flow(hass)
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        user_input={
+            CONF_HOST: "192.168.1.200",
+            CONF_USERNAME: "Admin",
+            CONF_PASSWORD: "wrong",
+            CONF_SCAN_INTERVAL: 30,
+        },
+    )
+    assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "reconfigure"
+    assert result["errors"] == {"base": "invalid_auth"}

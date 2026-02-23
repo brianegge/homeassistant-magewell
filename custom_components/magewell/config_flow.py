@@ -108,3 +108,57 @@ class MagewellConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             ),
             errors=errors,
         )
+
+    async def async_step_reconfigure(self, user_input=None):
+        """Handle reconfiguration of the integration."""
+        errors = {}
+        entry = self._get_reconfigure_entry()
+
+        if user_input is not None:
+            host = user_input[CONF_HOST]
+            username = user_input[CONF_USERNAME]
+            password = user_input[CONF_PASSWORD]
+
+            client = MagewellClient(host, username, password)
+            try:
+                await client.login()
+                await client.get_summary_info()
+            except MagewellAuthError:
+                errors["base"] = "invalid_auth"
+            except Exception:  # noqa: BLE001
+                errors["base"] = "cannot_connect"
+            finally:
+                await client.close()
+
+            if not errors:
+                return self.async_update_reload_and_abort(
+                    entry,
+                    title=f"Magewell ({host})",
+                    data=user_input,
+                )
+
+        return self.async_show_form(
+            step_id="reconfigure",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(
+                        CONF_HOST, default=entry.data.get(CONF_HOST)
+                    ): str,
+                    vol.Required(
+                        CONF_USERNAME,
+                        default=entry.data.get(CONF_USERNAME, DEFAULT_USERNAME),
+                    ): str,
+                    vol.Required(CONF_PASSWORD): str,
+                    vol.Optional(
+                        CONF_SCAN_INTERVAL,
+                        default=entry.data.get(
+                            CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
+                        ),
+                    ): vol.All(
+                        vol.Coerce(int),
+                        vol.Range(min=MIN_SCAN_INTERVAL, max=MAX_SCAN_INTERVAL),
+                    ),
+                }
+            ),
+            errors=errors,
+        )

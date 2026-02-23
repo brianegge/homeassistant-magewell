@@ -3,6 +3,7 @@
 from unittest.mock import AsyncMock
 
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_registry as er
 
 from custom_components.magewell.sensor import _get_ndi_source_name, _get_resolution
 
@@ -31,13 +32,28 @@ async def test_sensors_created(
     assert state.attributes["video_resolution"] == "1920x1080@60fps"
     assert state.attributes["ip_addr"] == "192.168.1.50"
 
-    state = hass.states.get("sensor.magewelltest_cpu_usage")
-    assert state is not None
-    assert state.state == "25.0"
 
-    state = hass.states.get("sensor.magewelltest_core_temperature")
-    assert state is not None
-    assert state.state == "45.0"
+async def test_disabled_by_default_sensors(
+    hass: HomeAssistant,
+    mock_config_entry,
+    mock_magewell_client_init: AsyncMock,
+) -> None:
+    """Test that CPU usage and core temperature sensors are disabled by default."""
+    await setup_integration(hass, mock_config_entry)
+
+    ent_reg = er.async_get(hass)
+
+    cpu_entry = ent_reg.async_get("sensor.magewelltest_cpu_usage")
+    assert cpu_entry is not None
+    assert cpu_entry.disabled_by is er.RegistryEntryDisabler.INTEGRATION
+
+    temp_entry = ent_reg.async_get("sensor.magewelltest_core_temperature")
+    assert temp_entry is not None
+    assert temp_entry.disabled_by is er.RegistryEntryDisabler.INTEGRATION
+
+    # Disabled entities should not have state
+    assert hass.states.get("sensor.magewelltest_cpu_usage") is None
+    assert hass.states.get("sensor.magewelltest_core_temperature") is None
 
 
 def test_get_ndi_source_name_from_url() -> None:

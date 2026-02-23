@@ -52,9 +52,73 @@ Copy `custom_components/magewell/` into your Home Assistant `config/custom_compo
 | CPU Usage | `sensor` | percentage | *(diagnostic)* |
 | Core Temperature | `sensor` | °C | *(diagnostic)* |
 
-## How it works
+## Data updates
 
-The integration communicates with the Magewell device over its local HTTP API (`http://<host>/mwapi`). It authenticates with MD5-hashed credentials, maintains a persistent TCP session, and polls at the configured interval for device summary, current channel, and available NDI sources. No cloud services or external dependencies are required.
+The integration polls the Magewell device over its local HTTP API (`http://<host>/mwapi`) at the configured scan interval (default: 30 seconds, range: 10--300 seconds). Each poll fetches three endpoints: device summary (status, CPU, temperature, NDI state), current channel, and discovered NDI sources. Authentication uses MD5-hashed credentials over a persistent TCP connection. All communication is local; no cloud services or external dependencies are required.
+
+## Supported devices
+
+- **Magewell Pro Convert** NDI decoder family, including:
+  - Pro Convert for NDI to HDMI
+  - Pro Convert for NDI to SDI
+  - Pro Convert for NDI to HDMI 4K
+  - Pro Convert for NDI to AIO
+- Any Magewell device exposing the `/mwapi` HTTP management API with firmware supporting `get-summary-info`, `get-channel`, `get-ndi-sources`, and `set-channel` methods.
+
+## Known limitations
+
+- **No auto-discovery**: Magewell devices do not advertise via SSDP, Zeroconf, or DHCP, so the device IP must be entered manually.
+- **HTTP only**: The device API does not support HTTPS. Credentials are sent as MD5 hashes, not plaintext, but traffic is unencrypted.
+- **Single session**: The device supports a limited number of concurrent HTTP sessions. If you have the web UI open, polling may occasionally fail.
+- **NDI source list latency**: Discovered NDI sources are refreshed each polling cycle. New sources may take up to one scan interval to appear.
+- **CPU Usage and Core Temperature** are disabled by default since they are primarily diagnostic; enable them in the entity settings if needed.
+
+## Use cases
+
+- **Broadcast monitoring**: Display the active NDI source, connection status, and device health on a Home Assistant dashboard for at-a-glance production monitoring.
+- **Automated source switching**: Use automations to switch NDI inputs based on schedules, triggers from other integrations, or manual dashboard controls.
+- **Health alerting**: Send notifications when the device status changes to `error`, the NDI connection drops, or CPU/temperature exceed thresholds.
+- **Multi-device management**: Add multiple Magewell Pro Convert devices to monitor and control an entire NDI decoder fleet from a single dashboard.
+
+## Automation examples
+
+**Notify when NDI connection drops:**
+```yaml
+automation:
+  - alias: "Magewell NDI disconnected alert"
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.magewell_ndi_connected
+        to: "off"
+    action:
+      - service: notify.notify
+        data:
+          title: "Magewell Alert"
+          message: "NDI source disconnected on {{ trigger.to_state.attributes.friendly_name }}"
+```
+
+**Switch NDI source on schedule:**
+```yaml
+automation:
+  - alias: "Switch to Camera 2 at noon"
+    trigger:
+      - platform: time
+        at: "12:00:00"
+    action:
+      - service: select.select_option
+        target:
+          entity_id: select.magewell_ndi_source_select
+        data:
+          option: "Camera 2"
+```
+
+## Troubleshooting
+
+- **Cannot connect during setup**: Verify the device IP is correct and reachable. Try accessing `http://<host>/mwapi?method=login&id=Admin&pass=<md5hash>` in a browser.
+- **Invalid auth**: Confirm the username and password match the device's web UI credentials. The default username is `Admin`.
+- **Entities show unavailable**: The device may have rebooted or lost network connectivity. Check the device's web UI. If the issue persists, the integration will create a repair issue after 5 consecutive failures.
+- **NDI source list is empty**: The decoder may not see any NDI sources on the network. Verify NDI traffic can reach the device (multicast/unicast routing).
+- **Stale data after changing settings on the device web UI**: Changes made outside Home Assistant are picked up on the next poll cycle. Reduce the scan interval or manually trigger a refresh.
 
 ## Removal
 

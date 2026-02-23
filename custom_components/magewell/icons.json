@@ -1,0 +1,28 @@
+{
+  "entity": {
+    "sensor": {
+      "status": {
+        "default": "mdi:video-check"
+      },
+      "ndi_source": {
+        "default": "mdi:video-input-hdmi"
+      },
+      "cpu_usage": {
+        "default": "mdi:cpu-64-bit"
+      },
+      "core_temperature": {
+        "default": "mdi:thermometer"
+      }
+    },
+    "binary_sensor": {
+      "ndi_connected": {
+        "default": "mdi:video-input-hdmi"
+      }
+    },
+    "select": {
+      "ndi_source_select": {
+        "default": "mdi:video-switch"
+      }
+    }
+  }
+}

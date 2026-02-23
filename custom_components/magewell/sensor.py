@@ -1,12 +1,10 @@
 """Sensor platform for Magewell Pro Convert."""
 
-import logging
 import urllib.parse
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
-    SensorEntityDescription,
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
@@ -18,8 +16,6 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
 from .coordinator import MagewellCoordinator
-
-_LOGGER = logging.getLogger(__name__)
 
 PARALLEL_UPDATES = 0
 
@@ -97,13 +93,11 @@ class MagewellStatusSensor(MagewellEntity, SensorEntity):
     """Sensor showing overall device status."""
 
     _attr_translation_key = "status"
-    _attr_icon = "mdi:video-check"
 
     def __init__(self, coordinator: MagewellCoordinator, entry: ConfigEntry) -> None:
         """Initialize."""
         super().__init__(coordinator, entry)
         self._attr_unique_id = f"{entry.entry_id}_status"
-        self._attr_name = "Status"
 
     @property
     def native_value(self) -> str | None:
@@ -130,13 +124,12 @@ class MagewellStatusSensor(MagewellEntity, SensorEntity):
 class MagewellNdiSourceSensor(MagewellEntity, SensorEntity):
     """Sensor showing the current NDI source name."""
 
-    _attr_icon = "mdi:video-input-hdmi"
+    _attr_translation_key = "ndi_source"
 
     def __init__(self, coordinator: MagewellCoordinator, entry: ConfigEntry) -> None:
         """Initialize."""
         super().__init__(coordinator, entry)
         self._attr_unique_id = f"{entry.entry_id}_ndi_source"
-        self._attr_name = "NDI Source"
 
     @property
     def native_value(self) -> str | None:
@@ -163,16 +156,16 @@ class MagewellNdiSourceSensor(MagewellEntity, SensorEntity):
 class MagewellCpuSensor(MagewellEntity, SensorEntity):
     """Sensor showing CPU usage."""
 
-    _attr_icon = "mdi:cpu-64-bit"
+    _attr_translation_key = "cpu_usage"
     _attr_native_unit_of_measurement = PERCENTAGE
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_entity_registry_enabled_default = False
 
     def __init__(self, coordinator: MagewellCoordinator, entry: ConfigEntry) -> None:
         """Initialize."""
         super().__init__(coordinator, entry)
         self._attr_unique_id = f"{entry.entry_id}_cpu_usage"
-        self._attr_name = "CPU Usage"
 
     @property
     def native_value(self) -> float | None:
@@ -187,17 +180,17 @@ class MagewellCpuSensor(MagewellEntity, SensorEntity):
 class MagewellTemperatureSensor(MagewellEntity, SensorEntity):
     """Sensor showing core temperature."""
 
-    _attr_icon = "mdi:thermometer"
+    _attr_translation_key = "core_temperature"
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_entity_registry_enabled_default = False
 
     def __init__(self, coordinator: MagewellCoordinator, entry: ConfigEntry) -> None:
         """Initialize."""
         super().__init__(coordinator, entry)
         self._attr_unique_id = f"{entry.entry_id}_core_temp"
-        self._attr_name = "Core Temperature"
 
     @property
     def native_value(self) -> float | None:

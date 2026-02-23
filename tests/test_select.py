@@ -2,7 +2,10 @@
 
 from unittest.mock import AsyncMock
 
+import pytest
+
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
 
 from custom_components.magewell.api import MagewellApiError
 
@@ -46,17 +49,17 @@ async def test_select_option_api_error(
     mock_config_entry,
     mock_magewell_client_init: AsyncMock,
 ) -> None:
-    """Test select handles API error gracefully."""
+    """Test select raises HomeAssistantError on API failure."""
     await setup_integration(hass, mock_config_entry)
 
     mock_magewell_client_init.set_channel.side_effect = MagewellApiError("fail")
 
-    await hass.services.async_call(
-        "select",
-        "select_option",
-        {"entity_id": "select.magewelltest_ndi_source_select", "option": "Camera 2"},
-        blocking=True,
-    )
+    with pytest.raises(HomeAssistantError):
+        await hass.services.async_call(
+            "select",
+            "select_option",
+            {"entity_id": "select.magewelltest_ndi_source_select", "option": "Camera 2"},
+            blocking=True,
+        )
 
-    # Should not raise, error is logged
     mock_magewell_client_init.set_channel.assert_awaited_once_with("Camera 2")

@@ -26,13 +26,12 @@ class MagewellNdiConnectedSensor(MagewellEntity, BinarySensorEntity):
     """Binary sensor indicating NDI connection status."""
 
     _attr_device_class = BinarySensorDeviceClass.CONNECTIVITY
-    _attr_icon = "mdi:video-input-hdmi"
+    _attr_translation_key = "ndi_connected"
 
     def __init__(self, coordinator: MagewellCoordinator, entry: ConfigEntry) -> None:
         """Initialize."""
         super().__init__(coordinator, entry)
         self._attr_unique_id = f"{entry.entry_id}_ndi_connected"
-        self._attr_name = "NDI Connected"
 
     @property
     def is_on(self) -> bool | None:
