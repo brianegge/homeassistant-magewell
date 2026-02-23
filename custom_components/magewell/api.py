@@ -27,13 +27,20 @@ class MagewellClient:
         self._password_md5 = hashlib.md5(password.encode()).hexdigest()
         self._base_url = f"http://{host}/mwapi"
         self._session: aiohttp.ClientSession | None = None
+        self._connector: aiohttp.TCPConnector | None = None
         self._logged_in = False
 
     def _ensure_session(self) -> aiohttp.ClientSession:
         """Create session if needed."""
         if self._session is None or self._session.closed:
+            self._connector = aiohttp.TCPConnector(
+                keepalive_timeout=300,
+                enable_cleanup_closed=True,
+            )
             jar = aiohttp.CookieJar(unsafe=True)
-            self._session = aiohttp.ClientSession(cookie_jar=jar)
+            self._session = aiohttp.ClientSession(
+                connector=self._connector, cookie_jar=jar
+            )
             self._logged_in = False
         return self._session
 
@@ -133,8 +140,11 @@ class MagewellClient:
         return data.get("channels", [])
 
     async def close(self) -> None:
-        """Close the HTTP session."""
+        """Close the HTTP session and connector."""
         if self._session and not self._session.closed:
             await self._session.close()
+        if self._connector and not self._connector.closed:
+            await self._connector.close()
         self._session = None
+        self._connector = None
         self._logged_in = False
