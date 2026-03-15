@@ -214,7 +214,7 @@ async def test_close_already_closed(client: MagewellClient) -> None:
     await client.close()
 
 
-async def test_ensure_session_creates_new(client: MagewellClient) -> None:
+async def test_ensure_session_creates_new(client: MagewellClient) -> None:  # NOSONAR
     """Test _ensure_session creates a new session when none exists."""
     assert client._session is None
 

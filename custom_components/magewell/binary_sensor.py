@@ -14,7 +14,11 @@ from .sensor import MagewellEntity, _get_ndi_source_name, _get_resolution
 PARALLEL_UPDATES = 0
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
+async def async_setup_entry(
+    hass: HomeAssistant,  # NOSONAR
+    entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
     """Set up Magewell binary sensors from a config entry."""
     coordinator = entry.runtime_data.coordinator
     async_add_entities([MagewellNdiConnectedSensor(coordinator, entry)])
