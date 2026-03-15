@@ -75,7 +75,11 @@ class MagewellEntity(CoordinatorEntity):
         }
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
+async def async_setup_entry(
+    hass: HomeAssistant,  # NOSONAR
+    entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
     """Set up Magewell sensors from a config entry."""
     coordinator = entry.runtime_data.coordinator
     async_add_entities(

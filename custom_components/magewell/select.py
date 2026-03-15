@@ -14,7 +14,11 @@ from .sensor import MagewellEntity, _get_ndi_source_name
 PARALLEL_UPDATES = 1
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
+async def async_setup_entry(
+    hass: HomeAssistant,  # NOSONAR
+    entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
     """Set up Magewell select entity from a config entry."""
     coordinator = entry.runtime_data.coordinator
     client = entry.runtime_data.client
