@@ -38,9 +38,7 @@ class MagewellClient:
                 enable_cleanup_closed=True,
             )
             jar = aiohttp.CookieJar(unsafe=True)
-            self._session = aiohttp.ClientSession(
-                connector=self._connector, cookie_jar=jar
-            )
+            self._session = aiohttp.ClientSession(connector=self._connector, cookie_jar=jar)
             self._logged_in = False
         return self._session
 
@@ -64,9 +62,7 @@ class MagewellClient:
 
         if data.get("status") != 0:
             self._logged_in = False
-            raise MagewellAuthError(
-                f"Login failed (status={data.get('status')})"
-            )
+            raise MagewellAuthError(f"Login failed (status={data.get('status')})")
 
         self._logged_in = True
         _LOGGER.debug("Logged in to Magewell at %s", self._host)
@@ -87,9 +83,7 @@ class MagewellClient:
             ) as resp:
                 data = await resp.json(content_type=None)
         except (aiohttp.ClientError, TimeoutError) as err:
-            raise MagewellApiError(
-                f"API call {method} failed: {err}"
-            ) from err
+            raise MagewellApiError(f"API call {method} failed: {err}") from err
 
         # Re-login once on session expiry (status -1 or missing)
         status = data.get("status", -1)
@@ -105,14 +99,10 @@ class MagewellClient:
                 ) as resp:
                     data = await resp.json(content_type=None)
             except (aiohttp.ClientError, TimeoutError) as err:
-                raise MagewellApiError(
-                    f"API call {method} failed after re-login: {err}"
-                ) from err
+                raise MagewellApiError(f"API call {method} failed after re-login: {err}") from err
 
             if data.get("status") != 0:
-                raise MagewellApiError(
-                    f"API call {method} returned status {data.get('status')}"
-                )
+                raise MagewellApiError(f"API call {method} returned status {data.get('status')}")
 
         return data
 

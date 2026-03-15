@@ -64,7 +64,6 @@ class MagewellEntity(CoordinatorEntity):
         """Return device info to group entities."""
         summary = self.coordinator.data.get("summary", {}) if self.coordinator.data else {}
         device = summary.get("device", {})
-        ndi = summary.get("ndi", {})
         return {
             "identifiers": {(DOMAIN, self._entry.entry_id)},
             "name": device.get("name", "Magewell Pro Convert"),
@@ -76,17 +75,17 @@ class MagewellEntity(CoordinatorEntity):
         }
 
 
-async def async_setup_entry(
-    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
-) -> None:
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
     """Set up Magewell sensors from a config entry."""
     coordinator = entry.runtime_data.coordinator
-    async_add_entities([
-        MagewellStatusSensor(coordinator, entry),
-        MagewellNdiSourceSensor(coordinator, entry),
-        MagewellCpuSensor(coordinator, entry),
-        MagewellTemperatureSensor(coordinator, entry),
-    ])
+    async_add_entities(
+        [
+            MagewellStatusSensor(coordinator, entry),
+            MagewellNdiSourceSensor(coordinator, entry),
+            MagewellCpuSensor(coordinator, entry),
+            MagewellTemperatureSensor(coordinator, entry),
+        ]
+    )
 
 
 class MagewellStatusSensor(MagewellEntity, SensorEntity):

@@ -73,9 +73,7 @@ async def test_call_success(client: MagewellClient) -> None:
     """Test a successful API call."""
     mock_session = MagicMock()
     mock_session.closed = False
-    mock_session.get = MagicMock(
-        return_value=_mock_response({"status": 0, "data": "test"})
-    )
+    mock_session.get = MagicMock(return_value=_mock_response({"status": 0, "data": "test"}))
     client._session = mock_session
     client._logged_in = True
 
@@ -134,14 +132,16 @@ async def test_get_ndi_sources(client: MagewellClient) -> None:
     mock_session = MagicMock()
     mock_session.closed = False
     mock_session.get = MagicMock(
-        return_value=_mock_response({
-            "status": 0,
-            "sources": [
-                {"name": "Camera 1"},
-                {"name": "Camera 2"},
-                {"other": "no name key"},
-            ],
-        })
+        return_value=_mock_response(
+            {
+                "status": 0,
+                "sources": [
+                    {"name": "Camera 1"},
+                    {"name": "Camera 2"},
+                    {"other": "no name key"},
+                ],
+            }
+        )
     )
     client._session = mock_session
     client._logged_in = True
@@ -154,9 +154,7 @@ async def test_set_channel(client: MagewellClient) -> None:
     """Test set_channel sends the correct ndi-name parameter."""
     mock_session = MagicMock()
     mock_session.closed = False
-    mock_session.get = MagicMock(
-        return_value=_mock_response({"status": 0})
-    )
+    mock_session.get = MagicMock(return_value=_mock_response({"status": 0}))
     client._session = mock_session
     client._logged_in = True
 
@@ -171,10 +169,12 @@ async def test_list_channels(client: MagewellClient) -> None:
     mock_session = MagicMock()
     mock_session.closed = False
     mock_session.get = MagicMock(
-        return_value=_mock_response({
-            "status": 0,
-            "channels": [{"name": "preset1"}, {"name": "preset2"}],
-        })
+        return_value=_mock_response(
+            {
+                "status": 0,
+                "channels": [{"name": "preset1"}, {"name": "preset2"}],
+            }
+        )
     )
     client._session = mock_session
     client._logged_in = True
@@ -218,8 +218,7 @@ async def test_ensure_session_creates_new(client: MagewellClient) -> None:
     """Test _ensure_session creates a new session when none exists."""
     assert client._session is None
 
-    with patch("aiohttp.TCPConnector") as mock_connector_cls, \
-         patch("aiohttp.ClientSession") as mock_session_cls:
+    with patch("aiohttp.TCPConnector") as mock_connector_cls, patch("aiohttp.ClientSession") as mock_session_cls:
         mock_session = MagicMock()
         mock_session.closed = False
         mock_session_cls.return_value = mock_session

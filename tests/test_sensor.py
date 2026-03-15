@@ -7,7 +7,7 @@ from homeassistant.helpers import entity_registry as er
 
 from custom_components.magewell.sensor import _get_ndi_source_name, _get_resolution
 
-from .conftest import MOCK_SUMMARY_INFO, setup_integration
+from .conftest import setup_integration
 
 
 async def test_sensors_created(

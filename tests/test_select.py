@@ -3,7 +3,6 @@
 from unittest.mock import AsyncMock
 
 import pytest
-
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 
