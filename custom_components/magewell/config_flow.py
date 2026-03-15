@@ -1,7 +1,6 @@
 """Config flow for Magewell Pro Convert."""
 
 import voluptuous as vol
-
 from homeassistant import config_entries
 from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_USERNAME
 
@@ -36,7 +35,7 @@ class MagewellConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 await client.get_summary_info()
             except MagewellAuthError:
                 errors["base"] = "invalid_auth"
-            except Exception:  # noqa: BLE001
+            except Exception:
                 errors["base"] = "cannot_connect"
             finally:
                 await client.close()
@@ -56,9 +55,7 @@ class MagewellConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     vol.Required(CONF_HOST): str,
                     vol.Required(CONF_USERNAME, default=DEFAULT_USERNAME): str,
                     vol.Required(CONF_PASSWORD): str,
-                    vol.Optional(
-                        CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL
-                    ): vol.All(
+                    vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): vol.All(
                         vol.Coerce(int),
                         vol.Range(min=MIN_SCAN_INTERVAL, max=MAX_SCAN_INTERVAL),
                     ),
@@ -87,7 +84,7 @@ class MagewellConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 await client.get_summary_info()
             except MagewellAuthError:
                 errors["base"] = "invalid_auth"
-            except Exception:  # noqa: BLE001
+            except Exception:
                 errors["base"] = "cannot_connect"
             finally:
                 await client.close()
@@ -125,7 +122,7 @@ class MagewellConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 await client.get_summary_info()
             except MagewellAuthError:
                 errors["base"] = "invalid_auth"
-            except Exception:  # noqa: BLE001
+            except Exception:
                 errors["base"] = "cannot_connect"
             finally:
                 await client.close()
@@ -141,9 +138,7 @@ class MagewellConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="reconfigure",
             data_schema=vol.Schema(
                 {
-                    vol.Required(
-                        CONF_HOST, default=entry.data.get(CONF_HOST)
-                    ): str,
+                    vol.Required(CONF_HOST, default=entry.data.get(CONF_HOST)): str,
                     vol.Required(
                         CONF_USERNAME,
                         default=entry.data.get(CONF_USERNAME, DEFAULT_USERNAME),
@@ -151,9 +146,7 @@ class MagewellConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     vol.Required(CONF_PASSWORD): str,
                     vol.Optional(
                         CONF_SCAN_INTERVAL,
-                        default=entry.data.get(
-                            CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
-                        ),
+                        default=entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL),
                     ): vol.All(
                         vol.Coerce(int),
                         vol.Range(min=MIN_SCAN_INTERVAL, max=MAX_SCAN_INTERVAL),

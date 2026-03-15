@@ -4,19 +4,18 @@ from collections.abc import Generator
 from unittest.mock import AsyncMock, patch
 
 import pytest
-
 from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_USERNAME
 from homeassistant.core import HomeAssistant
+from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.magewell.const import CONF_SCAN_INTERVAL, DOMAIN
-
-from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 
 @pytest.fixture(autouse=True)
 def auto_enable_custom_integrations(enable_custom_integrations):
     """Enable custom integrations for all tests."""
     yield
+
 
 MOCK_HOST = "192.168.1.100"
 MOCK_USER_INPUT = {

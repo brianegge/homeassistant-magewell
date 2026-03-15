@@ -3,8 +3,7 @@
 from unittest.mock import AsyncMock
 
 import pytest
-
-from homeassistant.config_entries import SOURCE_REAUTH, SOURCE_USER
+from homeassistant.config_entries import SOURCE_USER
 from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_USERNAME
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
@@ -19,9 +18,7 @@ async def test_full_user_flow(
     mock_magewell_client: AsyncMock,
 ) -> None:
     """Test a successful config flow from start to finish."""
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": SOURCE_USER}
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
     assert result["type"] is FlowResultType.FORM
     assert result["step_id"] == "user"
 
@@ -94,9 +91,7 @@ async def test_user_flow_recovery_after_error(
     """Test recovery after initial error."""
     mock_magewell_client.login.side_effect = MagewellAuthError("bad")
 
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": SOURCE_USER}
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
         user_input={
@@ -131,9 +126,7 @@ async def test_user_flow_already_configured(
     """Test abort when device is already configured."""
     mock_config_entry.add_to_hass(hass)
 
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": SOURCE_USER}
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
         user_input={
@@ -155,9 +148,7 @@ async def test_user_flow_summary_info_fails(
     """Test error when login succeeds but get_summary_info fails."""
     mock_magewell_client.get_summary_info.side_effect = Exception("device error")
 
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": SOURCE_USER}
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
         user_input={

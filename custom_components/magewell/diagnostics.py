@@ -11,9 +11,7 @@ from . import MagewellConfigEntry
 TO_REDACT = {CONF_PASSWORD, CONF_USERNAME}
 
 
-async def async_get_config_entry_diagnostics(
-    hass: HomeAssistant, entry: MagewellConfigEntry
-) -> dict[str, Any]:
+async def async_get_config_entry_diagnostics(hass: HomeAssistant, entry: MagewellConfigEntry) -> dict[str, Any]:
     """Return diagnostics for a config entry."""
     coordinator = entry.runtime_data.coordinator
 

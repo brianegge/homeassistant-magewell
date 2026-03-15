@@ -2,11 +2,8 @@
 
 from unittest.mock import AsyncMock
 
-import pytest
-
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryAuthFailed
 
 from custom_components.magewell.api import MagewellAuthError
 
