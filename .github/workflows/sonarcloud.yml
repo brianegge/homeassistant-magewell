@@ -10,17 +10,16 @@ jobs:
   sonarcloud:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - name: Install dependencies
         run: pip install pytest pytest-asyncio pytest-cov pytest-homeassistant-custom-component
       - name: Run tests with coverage
         run: pytest --cov=custom_components.magewell --cov-report=xml tests/
-        continue-on-error: true
       - uses: SonarSource/sonarqube-scan-action@v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
