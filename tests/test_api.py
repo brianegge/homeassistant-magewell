@@ -230,6 +230,60 @@ async def test_ensure_session_creates_new(client: MagewellClient) -> None:  # NO
         mock_connector_cls.assert_called_once()
 
 
+async def test_call_retry_connection_error_after_relogin(client: MagewellClient) -> None:
+    """Test API call fails when retry after re-login hits a connection error."""
+    call_count = 0
+
+    def side_effect(*args, **kwargs):
+        nonlocal call_count
+        call_count += 1
+        if call_count == 1:
+            # First call: expired session
+            return _mock_response({"status": -1})
+        elif call_count == 2:
+            # Re-login succeeds
+            return _mock_response({"status": 0})
+        else:
+            # Retry fails with connection error
+            cm = AsyncMock()
+            cm.__aenter__ = AsyncMock(side_effect=aiohttp.ClientError("timeout"))
+            cm.__aexit__ = AsyncMock(return_value=None)
+            return cm
+
+    mock_session = MagicMock()
+    mock_session.closed = False
+    mock_session.get = MagicMock(side_effect=side_effect)
+    client._session = mock_session
+    client._logged_in = True
+
+    with pytest.raises(MagewellApiError, match="failed after re-login"):
+        await client.get_summary_info()
+
+
+async def test_call_retry_bad_status_after_relogin(client: MagewellClient) -> None:
+    """Test API call fails when retry after re-login returns bad status."""
+    call_count = 0
+
+    def side_effect(*args, **kwargs):
+        nonlocal call_count
+        call_count += 1
+        if call_count == 1:
+            return _mock_response({"status": -1})
+        elif call_count == 2:
+            return _mock_response({"status": 0})
+        else:
+            return _mock_response({"status": -2})
+
+    mock_session = MagicMock()
+    mock_session.closed = False
+    mock_session.get = MagicMock(side_effect=side_effect)
+    client._session = mock_session
+    client._logged_in = True
+
+    with pytest.raises(MagewellApiError, match="returned status"):
+        await client.get_summary_info()
+
+
 async def test_call_auto_login_when_not_logged_in(client: MagewellClient) -> None:
     """Test _call automatically logs in if not logged in."""
     call_count = 0

@@ -240,6 +240,54 @@ async def test_reconfigure_flow_success(
     assert mock_config_entry.data[CONF_SCAN_INTERVAL] == 60
 
 
+async def test_reauth_flow_cannot_connect(
+    hass: HomeAssistant,
+    mock_setup_entry: AsyncMock,
+    mock_magewell_client: AsyncMock,
+    mock_config_entry,
+) -> None:
+    """Test reauth flow with connection error."""
+    mock_config_entry.add_to_hass(hass)
+    mock_magewell_client.login.side_effect = Exception("timeout")
+
+    result = await mock_config_entry.start_reauth_flow(hass)
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        user_input={
+            CONF_USERNAME: "Admin",
+            CONF_PASSWORD: "secret",
+        },
+    )
+    assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "reauth_confirm"
+    assert result["errors"] == {"base": "cannot_connect"}
+
+
+async def test_reconfigure_flow_cannot_connect(
+    hass: HomeAssistant,
+    mock_setup_entry: AsyncMock,
+    mock_magewell_client: AsyncMock,
+    mock_config_entry,
+) -> None:
+    """Test reconfigure flow with connection error."""
+    mock_config_entry.add_to_hass(hass)
+    mock_magewell_client.login.side_effect = Exception("timeout")
+
+    result = await mock_config_entry.start_reconfigure_flow(hass)
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        user_input={
+            CONF_HOST: "192.168.1.200",
+            CONF_USERNAME: "Admin",
+            CONF_PASSWORD: "secret",
+            CONF_SCAN_INTERVAL: 30,
+        },
+    )
+    assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "reconfigure"
+    assert result["errors"] == {"base": "cannot_connect"}
+
+
 async def test_reconfigure_flow_auth_error(
     hass: HomeAssistant,
     mock_setup_entry: AsyncMock,
