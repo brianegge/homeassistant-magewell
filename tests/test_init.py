@@ -1,6 +1,6 @@
 """Tests for the Magewell integration setup and teardown."""
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock
 
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
@@ -10,7 +10,7 @@ from custom_components.magewell.api import MagewellApiError, MagewellAuthError
 from custom_components.magewell.const import DOMAIN
 from custom_components.magewell.coordinator import CONSECUTIVE_FAILURE_THRESHOLD
 
-from .conftest import MOCK_CHANNEL, MOCK_NDI_SOURCES, MOCK_SUMMARY_INFO, setup_integration
+from .conftest import MOCK_SUMMARY_INFO, setup_integration
 
 
 async def test_setup_entry(
