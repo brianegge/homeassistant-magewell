@@ -9,6 +9,7 @@ on:
 jobs:
   sonarcloud:
     runs-on: ubuntu-latest
+    if: github.repository == 'brianegge/homeassistant-magewell'
     steps:
       - uses: actions/checkout@v4
         with:
