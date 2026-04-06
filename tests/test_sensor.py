@@ -5,9 +5,10 @@ from unittest.mock import AsyncMock
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 
+from custom_components.magewell.api import MagewellApiError
 from custom_components.magewell.sensor import _get_ndi_source_name, _get_resolution
 
-from .conftest import setup_integration
+from .conftest import MOCK_SUMMARY_INFO, setup_integration
 
 
 async def test_sensors_created(
@@ -54,6 +55,45 @@ async def test_disabled_by_default_sensors(
     # Disabled entities should not have state
     assert hass.states.get("sensor.magewelltest_cpu_usage") is None
     assert hass.states.get("sensor.magewelltest_core_temperature") is None
+
+
+async def test_sensor_unavailable_when_coordinator_data_none(
+    hass: HomeAssistant,
+    mock_config_entry,
+    mock_magewell_client_init: AsyncMock,
+) -> None:
+    """Test sensors return None/empty when coordinator data is None."""
+    await setup_integration(hass, mock_config_entry)
+
+    coordinator = mock_config_entry.runtime_data.coordinator
+
+    # Force coordinator data to None by making the update fail
+    mock_magewell_client_init.get_summary_info.side_effect = MagewellApiError("offline")
+    await coordinator.async_refresh()
+
+    state = hass.states.get("sensor.magewelltest_status")
+    assert state is not None
+    assert state.state == "unavailable"
+
+    state = hass.states.get("sensor.magewelltest_ndi_source")
+    assert state is not None
+    assert state.state == "unavailable"
+
+
+async def test_status_sensor_error_state(
+    hass: HomeAssistant,
+    mock_config_entry,
+    mock_magewell_client_init: AsyncMock,
+) -> None:
+    """Test status sensor shows error when status is non-zero."""
+    error_summary = {**MOCK_SUMMARY_INFO, "status": 1}
+    mock_magewell_client_init.get_summary_info.return_value = error_summary
+
+    await setup_integration(hass, mock_config_entry)
+
+    state = hass.states.get("sensor.magewelltest_status")
+    assert state is not None
+    assert state.state == "error"
 
 
 def test_get_ndi_source_name_from_url() -> None:

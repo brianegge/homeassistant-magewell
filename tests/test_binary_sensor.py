@@ -4,6 +4,8 @@ from unittest.mock import AsyncMock
 
 from homeassistant.core import HomeAssistant
 
+from custom_components.magewell.api import MagewellApiError
+
 from .conftest import setup_integration
 
 
@@ -52,3 +54,22 @@ async def test_ndi_disconnected_sensor(
     state = hass.states.get("binary_sensor.magewelltest_ndi_connected")
     assert state is not None
     assert state.state == "off"
+
+
+async def test_ndi_connected_sensor_unavailable(
+    hass: HomeAssistant,
+    mock_config_entry,
+    mock_magewell_client_init: AsyncMock,
+) -> None:
+    """Test binary sensor returns None when coordinator data is None."""
+    await setup_integration(hass, mock_config_entry)
+
+    coordinator = mock_config_entry.runtime_data.coordinator
+
+    # Force coordinator data to None by making the update fail
+    mock_magewell_client_init.get_summary_info.side_effect = MagewellApiError("offline")
+    await coordinator.async_refresh()
+
+    state = hass.states.get("binary_sensor.magewelltest_ndi_connected")
+    assert state is not None
+    assert state.state == "unavailable"
