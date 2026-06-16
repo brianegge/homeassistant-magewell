@@ -25,6 +25,6 @@ jobs:
         run: pytest --cov=custom_components.magewell --cov-report=xml tests/
         continue-on-error: true
       - if: ${{ env.SONAR_TOKEN != '' }}
-        uses: SonarSource/sonarqube-scan-action@v7
+        uses: SonarSource/sonarqube-scan-action@v8
         env:
           SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
