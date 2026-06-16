@@ -10,6 +10,8 @@ jobs:
   sonarcloud:
     runs-on: ubuntu-latest
     if: github.repository == 'brianegge/homeassistant-magewell'
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -22,6 +24,7 @@ jobs:
       - name: Run tests with coverage
         run: pytest --cov=custom_components.magewell --cov-report=xml tests/
         continue-on-error: true
-      - uses: SonarSource/sonarqube-scan-action@v7
+      - if: ${{ env.SONAR_TOKEN != '' }}
+        uses: SonarSource/sonarqube-scan-action@v7
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
