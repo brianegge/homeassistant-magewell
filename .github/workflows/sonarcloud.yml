@@ -18,9 +18,9 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-python@v7
         with:
-          python-version: "3.12"
+          python-version: "3.14"
       - name: Install dependencies
-        run: pip install pytest pytest-asyncio pytest-cov pytest-homeassistant-custom-component
+        run: pip install -r requirements.test.txt
       - name: Run tests with coverage
         run: pytest --cov=custom_components.magewell --cov-report=xml tests/
         continue-on-error: true

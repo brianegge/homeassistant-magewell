@@ -1,1 +1,3 @@
-pytest-homeassistant-custom-component>=0.13.205
+# Pinned, not floored: this package pins an exact Home Assistant release, so each
+# Dependabot bump is a test run against the next HA version.
+pytest-homeassistant-custom-component==0.13.367
