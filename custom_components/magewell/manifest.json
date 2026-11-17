@@ -1,6 +1,7 @@
 {
   "domain": "magewell",
   "name": "Magewell Pro Convert",
+  "categories": ["media_entertainment.tv_streaming"],
   "codeowners": ["@brianegge"],
   "config_flow": true,
   "documentation": "https://github.com/brianegge/homeassistant-magewell",

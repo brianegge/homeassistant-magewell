@@ -83,6 +83,9 @@
     },
     "update_failed": {
       "message": "Error communicating with Magewell device: {error}"
+    },
+    "unload_failed": {
+      "message": "Failed to unload one or more Magewell platforms"
     }
   },
   "issues": {

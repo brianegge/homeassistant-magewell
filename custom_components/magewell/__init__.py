@@ -6,10 +6,10 @@ from dataclasses import dataclass
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_USERNAME
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryAuthFailed
+from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryError
 
 from .api import MagewellAuthError, MagewellClient
-from .const import CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL, PLATFORMS
+from .const import CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL, DOMAIN, PLATFORMS
 from .coordinator import MagewellCoordinator
 
 _LOGGER = logging.getLogger(__name__)
@@ -56,7 +56,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: MagewellConfigEntry) -> 
 
 async def async_unload_entry(hass: HomeAssistant, entry: MagewellConfigEntry) -> bool:
     """Unload a config entry."""
-    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
-    if unload_ok:
-        await entry.runtime_data.client.close()
-    return unload_ok
+    # Raise rather than return False so the user sees why (HA 2026.11). Success
+    # still returns True: HA releases before 2026.11 require a bool here.
+    if not await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
+        raise ConfigEntryError(translation_domain=DOMAIN, translation_key="unload_failed")
+    await entry.runtime_data.client.close()
+    return True
