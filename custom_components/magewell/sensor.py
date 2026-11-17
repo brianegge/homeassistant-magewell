@@ -74,7 +74,8 @@ class MagewellEntity(CoordinatorEntity):
             model=device.get("product", "Pro Convert"),
             sw_version=device.get("firmware-version", ""),
             serial_number=device.get("serial-number", ""),
-            configuration_url=f"http://{self._entry.data['host']}",
+            # The device's web UI is plain HTTP, like its API (see api.py).
+            configuration_url=f"http://{self._entry.data['host']}",  # NOSONAR
         )
 
 
