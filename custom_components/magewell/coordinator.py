@@ -1,5 +1,6 @@
 """DataUpdateCoordinator for Magewell Pro Convert."""
 
+import inspect
 import logging
 from datetime import timedelta
 
@@ -14,6 +15,11 @@ from .const import DOMAIN
 _LOGGER = logging.getLogger(__name__)
 
 CONSECUTIVE_FAILURE_THRESHOLD = 5
+
+# HA 2026.11 lets a repair issue belong to a config entry, so it is deleted
+# along with the entry. Older releases (hacs.json allows 2024.1+) reject the
+# keyword, so only pass it where async_create_issue accepts it.
+ISSUE_SUPPORTS_CONFIG_ENTRY = "config_entry_id" in inspect.signature(ir.async_create_issue).parameters
 
 
 class MagewellCoordinator(DataUpdateCoordinator):
@@ -46,6 +52,9 @@ class MagewellCoordinator(DataUpdateCoordinator):
         except MagewellApiError as err:
             self._consecutive_failures += 1
             if self._consecutive_failures >= CONSECUTIVE_FAILURE_THRESHOLD:
+                issue_kwargs = {}
+                if ISSUE_SUPPORTS_CONFIG_ENTRY:
+                    issue_kwargs["config_entry_id"] = self._entry.entry_id
                 ir.async_create_issue(
                     self.hass,
                     DOMAIN,
@@ -57,6 +66,7 @@ class MagewellCoordinator(DataUpdateCoordinator):
                         "device": self._entry.title,
                         "count": str(self._consecutive_failures),
                     },
+                    **issue_kwargs,
                 )
             raise UpdateFailed(
                 translation_domain=DOMAIN,

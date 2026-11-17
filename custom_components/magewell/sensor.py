@@ -10,6 +10,7 @@ from homeassistant.components.sensor import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import PERCENTAGE, UnitOfTemperature
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -60,19 +61,22 @@ class MagewellEntity(CoordinatorEntity):
         self._entry = entry
 
     @property
-    def device_info(self):
+    def device_info(self) -> DeviceInfo:
         """Return device info to group entities."""
         summary = self.coordinator.data.get("summary", {}) if self.coordinator.data else {}
         device = summary.get("device", {})
-        return {
-            "identifiers": {(DOMAIN, self._entry.entry_id)},
-            "name": device.get("name", "Magewell Pro Convert"),
-            "manufacturer": "Magewell",
-            "model": device.get("product", "Pro Convert"),
-            "sw_version": device.get("firmware-version", ""),
-            "serial_number": device.get("serial-number", ""),
-            "configuration_url": f"http://{self._entry.data['host']}",
-        }
+        # Keyword construction works whether DeviceInfo is the pre-2026.11
+        # TypedDict or the 2026.11+ dataclass, which rejects plain dicts.
+        return DeviceInfo(
+            identifiers={(DOMAIN, self._entry.entry_id)},
+            name=device.get("name", "Magewell Pro Convert"),
+            manufacturer="Magewell",
+            model=device.get("product", "Pro Convert"),
+            sw_version=device.get("firmware-version", ""),
+            serial_number=device.get("serial-number", ""),
+            # The device's web UI is plain HTTP, like its API (see api.py).
+            configuration_url=f"http://{self._entry.data['host']}",  # NOSONAR
+        )
 
 
 async def async_setup_entry(

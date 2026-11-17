@@ -3,12 +3,14 @@
 from unittest.mock import AsyncMock
 
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 
 from custom_components.magewell.api import MagewellApiError
+from custom_components.magewell.const import DOMAIN
 from custom_components.magewell.sensor import _get_ndi_source_name, _get_resolution
 
-from .conftest import MOCK_SUMMARY_INFO, setup_integration
+from .conftest import MOCK_HOST, MOCK_SUMMARY_INFO, setup_integration
 
 
 async def test_sensors_created(
@@ -32,6 +34,32 @@ async def test_sensors_created(
     assert state.attributes["connected"] is True
     assert state.attributes["video_resolution"] == "1920x1080@60fps"
     assert state.attributes["ip_addr"] == "192.168.1.50"
+
+
+async def test_device_info(
+    hass: HomeAssistant,
+    mock_config_entry,
+    mock_magewell_client_init: AsyncMock,
+) -> None:
+    """Test all entities share one device keyed on the config entry ID."""
+    await setup_integration(hass, mock_config_entry)
+
+    dev_reg = dr.async_get(hass)
+    devices = dr.async_entries_for_config_entry(dev_reg, mock_config_entry.entry_id)
+    assert len(devices) == 1
+    device = devices[0]
+    assert device.identifiers == {(DOMAIN, mock_config_entry.entry_id)}
+    assert device.name == "MagewellTest"
+    assert device.manufacturer == "Magewell"
+    assert device.model == "Pro Convert"
+    assert device.sw_version == "1.3.456"
+    assert device.serial_number == "ABC123"
+    assert device.configuration_url == f"http://{MOCK_HOST}"
+
+    ent_reg = er.async_get(hass)
+    entities = er.async_entries_for_config_entry(ent_reg, mock_config_entry.entry_id)
+    assert len(entities) == 6
+    assert {entity.device_id for entity in entities} == {device.id}
 
 
 async def test_disabled_by_default_sensors(
